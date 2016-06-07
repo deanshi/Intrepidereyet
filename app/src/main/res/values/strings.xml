@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Intrepidereyet</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps">Intrepidereyet?</string>
+    <string name="button_name">Start Service</string>
 </resources>
