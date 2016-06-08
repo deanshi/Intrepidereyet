@@ -1,7 +1,10 @@
 package com.example.deanshi.intrepidereyet;
 
 import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -13,6 +16,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -36,22 +40,16 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
 
     public final static double INTREPID_LATITUDE = 42.3669292;
     public final static double INTREPID_LONGITUDE = -71.0800936;
-    public final static float RADIUS_DISTANCE = 50;
     public final static long INTERVAL_TIME = 1000;
+    public final static int ID_VALUE = 60; //Random value used in notify. What is the best practice for this?
 
     private static GoogleApiClient mGoogleApiClient;
     public static final String TAG = MapsActivity.class.getSimpleName();
     public static float[] results = new float[] {0};
-    public static Location location;
-    public static LocationListener locationListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-        }
-    };
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Timber.d("Service has been created and started");
+        Timber.d(TAG, "Service has been created and started");
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -64,8 +62,7 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
-        Timber.d("Connection established");
+        Timber.d(TAG, "Connection established");
         startLocationUpdates();
     }
 
@@ -83,32 +80,56 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
         LocationRequest locationRequest = new LocationRequest().create();
         locationRequest.setInterval(INTERVAL_TIME);
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
-
     }
 
     @Override
     public void onLocationChanged(Location location) {
         location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         Location.distanceBetween(location.getLatitude(), location.getLongitude(), INTREPID_LATITUDE, INTREPID_LONGITUDE, results);
-        Timber.d("Results: %f", results[0]);
+        if (results[0] < 30) {
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle("You have entered the Intrepid area")
+                    .setContentText("Click to send a message to Slack");
+
+            Intent resultIntent = new Intent(this, MapsActivity.class);
+
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+            stackBuilder.addParentStack(MapsActivity.class);
+            stackBuilder.addNextIntent(resultIntent);
+            PendingIntent resultPendingIntent =
+                    stackBuilder.getPendingIntent(
+                            0,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+            mBuilder.setContentIntent(resultPendingIntent);
+            Notification intrepidNotification = mBuilder.build();
+            intrepidNotification.flags |= Notification.FLAG_NO_CLEAR;
+            intrepidNotification.flags |= Notification.FLAG_ONGOING_EVENT;
+            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager.notify(ID_VALUE, mBuilder.build());
+
+        }
+        Timber.d(TAG, "Results: %f", results[0]);
     }
 
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Timber.d("Service has been bound");
+        Timber.d(TAG, "Service has been bound");
         return null;
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        Timber.d("Connection suspended");
+        Timber.d(TAG, "Connection suspended");
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Timber.d("Connection Failed");
+        Timber.d(TAG, "Connection Failed");
 
     }
 }

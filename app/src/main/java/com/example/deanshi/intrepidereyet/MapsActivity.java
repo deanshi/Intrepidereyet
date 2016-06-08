@@ -23,12 +23,11 @@ import timber.log.Timber;
 
 public class MapsActivity extends AppCompatActivity {
 
-    @BindView(R.id.button_id)
-    Button serviceStart;
-
     public final static int SECOND_VALUE = 1;
     public final static double MILI_TO_SECOND = 1000;
 
+    @BindView(R.id.button_id)
+    Button serviceStart;
 
     @OnClick(R.id.button_id)
     void startService() {
@@ -48,8 +47,5 @@ public class MapsActivity extends AppCompatActivity {
         }
 
         ButterKnife.bind(this);
-
     }
-
-
 }
