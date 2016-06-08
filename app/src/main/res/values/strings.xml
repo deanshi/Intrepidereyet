@@ -3,4 +3,8 @@
     <string name="title_activity_maps">Intrepidereyet?</string>
     <string name="button_name">Start Service</string>
     <string name="request_id">Intrepid_Geofence</string>
+    <string name="geofence_transition_entered">Entered Intrepid Area</string>
+    <string name="geofence_transition_exited">Entered Intrepid Area</string>
+    <string name="geofence_transition_unknown">Entered Intrepid Area</string>
+    <string name="geofence_transition_notification_text">Transition Detected</string>
 </resources>

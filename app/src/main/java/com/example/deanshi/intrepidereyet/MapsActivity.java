@@ -49,6 +49,22 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
     @OnClick(R.id.button_id)
     void startService() {
         Timber.d("Button has been clicked");
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        LocationServices.GeofencingApi.addGeofences(
+                mGoogleApiClient,
+                getGeofencingRequest(),
+                getGeofencePendingIntent()
+        ).setResultCallback(this);
         //Intent i = new Intent(this, MyService.class);
         //startService(i);
     }
@@ -90,25 +106,11 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
-        /*if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        LocationServices.GeofencingApi.addGeofences(
-                mGoogleApiClient,
-                getGeofencingRequest(),
-                getGeofencePendingIntent()
-        ).setResultCallback(this);*/
     }
 
 
     private GeofencingRequest getGeofencingRequest() {
+        Timber.d("Getting geofencing request");
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
         builder.addGeofence(intrepidGeofence);
@@ -116,6 +118,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private PendingIntent getGeofencePendingIntent() {
+        Timber.d("Processing Geofence Intent");
         // Reuse the PendingIntent if we already have it.
         if (mGeofencePendingIntent != null) {
             return mGeofencePendingIntent;
@@ -146,6 +149,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onResult(@NonNull Status status) {
-
+        Timber.d("Got result");
     }
 }

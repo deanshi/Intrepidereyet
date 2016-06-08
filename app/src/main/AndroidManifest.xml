@@ -18,13 +18,11 @@
         android:theme="@style/AppTheme" >
 
         <service
-            android:name="com.example.deanshi.intrepidereyet.MyService"
+            android:name="com.example.deanshi.intrepidereyet.GeofenceTransitionsIntentService"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
             >
         </service>
-        <service
-            android:name=".GeofenceTransitionsIntentService"/>
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
