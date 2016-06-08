@@ -8,6 +8,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -15,12 +16,15 @@ import android.support.v4.app.NotificationCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.text.DateFormat;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ThreadFactory;
 
 import timber.log.Timber;
 
@@ -28,13 +32,12 @@ import timber.log.Timber;
 /**
  * Created by deanshi on 6/7/16.
  */
-public class MyService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MyService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     public final static double INTREPID_LATITUDE = 42.3669292;
     public final static double INTREPID_LONGITUDE = -71.0800936;
     public final static float RADIUS_DISTANCE = 50;
-    public final static long INTERVAL_TIME = 15 * 60 * 1000;
-
+    public final static long INTERVAL_TIME = 1000;
 
     private static GoogleApiClient mGoogleApiClient;
     public static final String TAG = MapsActivity.class.getSimpleName();
@@ -45,7 +48,6 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
         public void onLocationChanged(Location location) {
         }
     };
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -60,17 +62,14 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
         return Service.START_NOT_STICKY;
     }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        Timber.d("Service has been bound");
-        return null;
-    }
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
 
         Timber.d("Connection established");
+        startLocationUpdates();
+    }
+
+    protected void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -81,35 +80,25 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-
         LocationRequest locationRequest = new LocationRequest().create();
         locationRequest.setInterval(INTERVAL_TIME);
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, locationListener);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
         location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         Location.distanceBetween(location.getLatitude(), location.getLongitude(), INTREPID_LATITUDE, INTREPID_LONGITUDE, results);
-
-        Runnable distanceThread = new Runnable() {
-            @Override
-            public void run() {
-
-                while (results[0] < 50) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-                    Location.distanceBetween(location.getLatitude(), location.getLongitude(), INTREPID_LATITUDE, INTREPID_LONGITUDE, results);
-                    Timber.d("Results: %f", results[0]);
-                }
-            }
-        };
-        distanceThread.run();
+        Timber.d("Results: %f", results[0]);
+    }
 
 
-
-
-
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        Timber.d("Service has been bound");
+        return null;
     }
 
     @Override
