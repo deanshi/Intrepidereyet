@@ -2,4 +2,5 @@
     <string name="app_name">Intrepidereyet</string>
     <string name="title_activity_maps">Intrepidereyet?</string>
     <string name="button_name">Start Service</string>
+    <string name="request_id">Intrepid_Geofence</string>
 </resources>
