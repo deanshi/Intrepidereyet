@@ -50,7 +50,7 @@ public class SendSlackActivity extends AppCompatActivity {
 
 
             MediaType jsonType = MediaType.parse("application/json; charset=utf-8");
-            String jsonString = " { \"text\" : \"dat boi\" }";
+            String jsonString = "{\"text\":\"I Am Here!\"}";
 
             URL url = null;
             try {
