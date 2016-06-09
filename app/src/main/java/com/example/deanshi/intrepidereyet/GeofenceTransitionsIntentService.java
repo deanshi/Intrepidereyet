@@ -39,7 +39,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
     @Override
     public void onCreate() {
 
-        Timber.d("Starting service");
+        Timber.d("Starting Geofence service");
         super.onCreate();
     }
 
@@ -55,56 +55,16 @@ public class GeofenceTransitionsIntentService extends IntentService {
             Timber.d("Error: Handling the intent");
             return;
         }
-
-        // Get the transition type.
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
-
-        // Test that the reported transition was of interest.
-        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-                geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-
-            // Get the geofences that were triggered. A single event can trigger multiple geofences.
-            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-
-            // Get the transition details as a String.
-            String geofenceTransitionDetails = getGeofenceTransitionDetails(
-                    this,
-                    geofenceTransition,
-                    triggeringGeofences
-            );
-
-            // Send notification and log the transition details.
-            sendNotification(geofenceTransitionDetails);
-            Log.i(TAG, geofenceTransitionDetails);
-        } else {
-            // Log the error.
-            Timber.d("Error: Could not get geofence transition");
-        }
-    }
-
-    /**
-     * Gets transition details and returns them as a formatted string.
-     *
-     * @param context               The app context.
-     * @param geofenceTransition    The ID of the geofence transition.
-     * @param triggeringGeofences   The geofence(s) triggered.
-     * @return                      The transition details formatted as String.
-     */
-    private String getGeofenceTransitionDetails(
-            Context context,
-            int geofenceTransition,
-            List<Geofence> triggeringGeofences) {
-
         String geofenceTransitionString = getTransitionString(geofenceTransition);
 
-        // Get the Ids of each geofence that was triggered.
-        ArrayList triggeringGeofencesIdsList = new ArrayList();
-        for (Geofence geofence : triggeringGeofences) {
-            triggeringGeofencesIdsList.add(geofence.getRequestId());
+        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+            Timber.d(geofenceTransitionString);
+            sendNotification(geofenceTransitionString);
+        } else {
+            // Log the error.
+            Timber.d("Error: Invalid or could not get geofence transition");
         }
-        String triggeringGeofencesIdsString = TextUtils.join(", ",  triggeringGeofencesIdsList);
-
-        return geofenceTransitionString + ": " + triggeringGeofencesIdsString;
     }
 
     /**
@@ -113,44 +73,25 @@ public class GeofenceTransitionsIntentService extends IntentService {
      */
     private void sendNotification(String notificationDetails) {
         // Create an explicit content Intent that starts the main Activity.
-        Intent notificationIntent = new Intent(getApplicationContext(), MapsActivity.class);
+        Intent notificationIntent = new Intent(getApplicationContext(), SendSlackReciever.class);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        // Construct a task stack.
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        PendingIntent pendingNotification = PendingIntent.getBroadcast(this, 0, notificationIntent, 0);
 
-        // Add the main Activity to the task stack as the parent.
-        stackBuilder.addParentStack(MapsActivity.class);
-
-        // Push the content Intent onto the stack.
-        stackBuilder.addNextIntent(notificationIntent);
-
-        // Get a PendingIntent containing the entire back stack.
-        PendingIntent notificationPendingIntent =
-                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        // Get a notification builder that's compatible with platform versions >= 4
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-
-        // Define the notification settings.
-        builder.setSmallIcon(R.mipmap.ic_launcher)
-                // In a real app, you may want to use a library like Volley
-                // to decode the Bitmap.
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(),
-                        R.mipmap.ic_launcher))
-                .setColor(Color.RED)
+        NotificationCompat.Builder transNotifyBuilder =
+                new NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(notificationDetails)
-                .setContentText(getString(R.string.geofence_transition_notification_text))
-                .setContentIntent(notificationPendingIntent);
+                .setAutoCancel(true);
 
-        // Dismiss notification once the user touches it.
-        builder.setAutoCancel(true);
+        if (notificationDetails.equals(getString(R.string.geofence_transition_entered))) {
+            transNotifyBuilder.setContentIntent(pendingNotification);
+            transNotifyBuilder.setContentText("Click to send a message to Slack");
+        }
 
-        // Get an instance of the Notification manager
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // Issue the notification
-        mNotificationManager.notify(0, builder.build());
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(0, transNotifyBuilder.build());
     }
 
     /**
