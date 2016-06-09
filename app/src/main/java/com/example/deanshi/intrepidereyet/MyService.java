@@ -21,9 +21,11 @@ import android.support.v4.app.TaskStackBuilder;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.drive.query.internal.NotFilter;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.phenotype.Flag;
 
 import java.text.DateFormat;
 import java.util.Timer;
@@ -86,32 +88,26 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
     public void onLocationChanged(Location location) {
         location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         Location.distanceBetween(location.getLatitude(), location.getLongitude(), INTREPID_LATITUDE, INTREPID_LONGITUDE, results);
+        Timber.d(TAG, "Results: %f", results[0]);
         if (results[0] < 30) {
+            Timber.d("Entered Intrepid Range");
             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(this)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentTitle("You have entered the Intrepid area")
                     .setContentText("Click to send a message to Slack");
 
-            Intent resultIntent = new Intent(this, MapsActivity.class);
+            Intent resultIntent = new Intent(this, SendSlackActivity.class);
+            resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            resultIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            PendingIntent resultPendingIntent = PendingIntent.getActivity(this, PendingIntent.FLAG_CANCEL_CURRENT, resultIntent, 0);
 
-            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-            stackBuilder.addParentStack(MapsActivity.class);
-            stackBuilder.addNextIntent(resultIntent);
-            PendingIntent resultPendingIntent =
-                    stackBuilder.getPendingIntent(
-                            0,
-                            PendingIntent.FLAG_UPDATE_CURRENT
-                    );
             mBuilder.setContentIntent(resultPendingIntent);
-            Notification intrepidNotification = mBuilder.build();
-            intrepidNotification.flags |= Notification.FLAG_NO_CLEAR;
-            intrepidNotification.flags |= Notification.FLAG_ONGOING_EVENT;
-            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            mNotificationManager.notify(ID_VALUE, mBuilder.build());
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.notify(ID_VALUE, mBuilder.build());
 
         }
-        Timber.d(TAG, "Results: %f", results[0]);
+
     }
 
 
