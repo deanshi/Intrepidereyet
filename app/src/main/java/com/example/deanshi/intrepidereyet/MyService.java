@@ -4,33 +4,21 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.drive.query.internal.NotFilter;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.phenotype.Flag;
-
-import java.text.DateFormat;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ThreadFactory;
 
 import timber.log.Timber;
 
@@ -88,29 +76,34 @@ public class MyService extends Service implements GoogleApiClient.ConnectionCall
     public void onLocationChanged(Location location) {
         location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         Location.distanceBetween(location.getLatitude(), location.getLongitude(), INTREPID_LATITUDE, INTREPID_LONGITUDE, results);
-        Timber.d(TAG, "Results: %f", results[0]);
+
         if (results[0] < 30) {
+            Timber.d(TAG, "Results: %f", results[0]);
             Timber.d("Entered Intrepid Range");
             NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(this)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentTitle("You have entered the Intrepid area")
-                    .setContentText("Click to send a message to Slack");
+                    .setContentText("Click to send a message to Slack")
+                    .setAutoCancel(true);
+            //Attempted to use Notification.flags |= Notification.Flags_AUTO_CANCEL, did not work, is depreciated?
 
-            Intent resultIntent = new Intent(this, SendSlackActivity.class);
+            Intent resultIntent = new Intent(this, SendSlackReciever.class);
             resultIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             resultIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            PendingIntent resultPendingIntent = PendingIntent.getActivity(this, PendingIntent.FLAG_CANCEL_CURRENT, resultIntent, 0);
-
+            PendingIntent resultPendingIntent = PendingIntent.getBroadcast(this, 0, resultIntent, 0);
             mBuilder.setContentIntent(resultPendingIntent);
+
             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             notificationManager.notify(ID_VALUE, mBuilder.build());
+
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
 
         }
 
     }
 
-
+    //Unused, required methods
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {

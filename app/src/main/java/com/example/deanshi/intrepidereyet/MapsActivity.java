@@ -1,20 +1,9 @@
 package com.example.deanshi.intrepidereyet;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
-
-import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -22,9 +11,6 @@ import butterknife.OnClick;
 import timber.log.Timber;
 
 public class MapsActivity extends AppCompatActivity {
-
-    public final static int SECOND_VALUE = 1;
-    public final static double MILI_TO_SECOND = 1000;
 
     @BindView(R.id.button_id)
     Button serviceStart;
