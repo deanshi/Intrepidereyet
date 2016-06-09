@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.os.AsyncTask;
 
 import com.google.android.gms.location.LocationServices;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -16,6 +19,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Body;
+import retrofit2.http.POST;
 import timber.log.Timber;
 
 /**
@@ -23,6 +31,7 @@ import timber.log.Timber;
  */
 public class SendSlackReciever extends BroadcastReceiver {
 
+    public static final String BASE_URL  = "https://hooks.slack.com/services/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";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -36,33 +45,32 @@ public class SendSlackReciever extends BroadcastReceiver {
         @Override
         protected Void doInBackground(Void... params) {
 
-            MediaType jsonType = MediaType.parse("application/json; charset=utf-8");
-            String jsonString = "{\"text\":\"I Am Here!\"}";
-            URL url = null;
-            try {
-                url = new URL("https://hooks.slack.com/services/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");
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-            Timber.d("URL Name Head: %s", url.toString());
-
-
-            OkHttpClient okClient = new OkHttpClient();
-
-            RequestBody slackBody = RequestBody.create(jsonType, jsonString);
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(slackBody)
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
                     .build();
 
-            try {
-                Response response = okClient.newCall(request).execute();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
             return null;
         }
     }
+
+    public interface SlackService {
+        @POST(BASE_URL)
+        Call<Response> sendSlackMessage(@Body SlackUser user);
+
+    }
+
+    public class SlackUser {
+        @SerializedName("text")
+        String textVal;
+
+        public SlackUser(String text) {
+            this.textVal = text;
+        }
+
+    }
+
 
 
 }
