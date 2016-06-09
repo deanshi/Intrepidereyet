@@ -58,7 +58,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
         String geofenceTransitionString = getTransitionString(geofenceTransition);
 
-        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
+                geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
             Timber.d(geofenceTransitionString);
             sendNotification(geofenceTransitionString);
         } else {
@@ -84,7 +85,6 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(notificationDetails)
                 .setAutoCancel(true);
-
         if (notificationDetails.equals(getString(R.string.geofence_transition_entered))) {
             transNotifyBuilder.setContentIntent(pendingNotification);
             transNotifyBuilder.setContentText("Click to send a message to Slack");

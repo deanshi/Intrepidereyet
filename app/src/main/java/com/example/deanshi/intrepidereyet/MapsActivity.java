@@ -28,6 +28,7 @@ import timber.log.Timber;
 /**
  * App Name: Intrepidereyet
  * Author: Dean Shi
+ * Use: Starts a service that uses Geofencing to determine if the user is 50m from
  */
 
 
@@ -97,6 +98,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
                 getGeofencingRequest(),
                 getGeofencePendingIntent()
         ).setResultCallback(this);
+
     }
 
     private GeofencingRequest getGeofencingRequest() {
@@ -122,7 +124,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        Timber.d("Google API connection failed");
     }
 
     @Override
@@ -133,6 +135,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onResult(@NonNull Status status) {
-        Timber.d("Got result");
+        Timber.d("Finished setting up Intrepid Geofence");
     }
 }
