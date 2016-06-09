@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">Intrepidereyet</string>
     <string name="title_activity_maps">Intrepidereyet?</string>
+    <string name="title_sendslack_maps">Intrepidere!</string>
     <string name="button_name">Start Service</string>
+    <string name="slack_success">Posting to #whos_here channel in Slack</string>
+    <string name="url_name">https://hooks.slack.com/services/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</string>
 </resources>
