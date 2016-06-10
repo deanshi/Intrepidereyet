@@ -18,8 +18,6 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -49,26 +47,27 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-
-        intrepidGeofence = new Geofence.Builder()
-                .setRequestId("Intrepid_Geofence")
-                .setCircularRegion(
-                        INTREPID_LAT,
-                        INTREPID_LONG,
-                        GEOFENCE_METERS
-                )
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                .build();
-
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
             Timber.d("Added Timber to the project");
+
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+
+            intrepidGeofence = new Geofence.Builder()
+                    .setRequestId("Intrepid_Geofence")
+                    .setCircularRegion(
+                            INTREPID_LAT,
+                            INTREPID_LONG,
+                            GEOFENCE_METERS
+                    )
+                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
+                    .build();
+
         }
         ButterKnife.bind(this);
     }
@@ -83,7 +82,8 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
     void startService() {
         Timber.d("Button has been clicked");
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -102,7 +102,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private GeofencingRequest getGeofencingRequest() {
-        Timber.d("Getting geofencing request");
+        Timber.d("Generating geofencing request");
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
         Timber.d(intrepidGeofence.toString());
@@ -111,7 +111,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private PendingIntent getGeofencePendingIntent() {
-        Timber.d("Processing Geofence Intent");
+        Timber.d("Generating geofence Intent");
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
         return PendingIntent.getService(this, 0, intent, 0);
     }

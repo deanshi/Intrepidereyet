@@ -5,24 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 
-import com.google.android.gms.location.LocationServices;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
+import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import timber.log.Timber;
 
@@ -31,7 +22,7 @@ import timber.log.Timber;
  */
 public class SendSlackReciever extends BroadcastReceiver {
 
-    public static final String BASE_URL  = "https://hooks.slack.com/services/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";
+    public static final String BASE_URL = "https://hooks.slack.com/services/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/";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -46,18 +37,32 @@ public class SendSlackReciever extends BroadcastReceiver {
         protected Void doInBackground(Void... params) {
 
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
+                    .baseUrl("https://hooks.slack.com/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
 
+            SlackService slackService = retrofit.create(SlackService.class);
+
+            slackService.sendSlackMessage("{\"text\":\"Retrofit Example Text\"}").enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(Call<String> call, retrofit2.Response<String> response) {
+                    Timber.d("Got response from server: %s", response.body());
+                }
+
+                @Override
+                public void onFailure(Call<String> call, Throwable t) {
+                    Timber.d("Failed to connect to server");
+                }
+            });
 
             return null;
         }
     }
 
     public interface SlackService {
-        @POST(BASE_URL)
-        Call<Response> sendSlackMessage(@Body SlackUser user);
+        @Headers({"Content-type: application/json"})
+        @POST("services/T026B13VA/B1FD8L8DN/tM77kIegYKZ78z4oF4reBjVQ")
+        Call<String> sendSlackMessage(@Body String message);
 
     }
 
@@ -70,7 +75,6 @@ public class SendSlackReciever extends BroadcastReceiver {
         }
 
     }
-
 
 
 }
