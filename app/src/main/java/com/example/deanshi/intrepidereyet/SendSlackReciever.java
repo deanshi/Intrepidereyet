@@ -26,8 +26,8 @@ public class SendSlackReciever extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        SlackIOTask startSlack = new SlackIOTask();
-        startSlack.execute();
+        SlackIOTask sendSlack = new SlackIOTask();
+        sendSlack.execute();
         context.stopService(new Intent(context, GeofenceTransitionsIntentService.class));
     }
 

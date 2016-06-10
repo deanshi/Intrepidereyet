@@ -50,12 +50,12 @@ public class GeofenceTransitionsIntentService extends IntentService {
      */
     @Override
     protected void onHandleIntent(Intent intent) {
-        GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-        if (geofencingEvent.hasError()) {
+        GeofencingEvent transitionEvent = GeofencingEvent.fromIntent(intent);
+        if (transitionEvent.hasError()) {
             Timber.d("Error: Handling the intent");
             return;
         }
-        int geofenceTransition = geofencingEvent.getGeofenceTransition();
+        int geofenceTransition = transitionEvent.getGeofenceTransition();
         String geofenceTransitionString = getTransitionString(geofenceTransition);
 
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||

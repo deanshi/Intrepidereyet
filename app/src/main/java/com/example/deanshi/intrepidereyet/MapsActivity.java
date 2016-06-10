@@ -28,7 +28,8 @@ import timber.log.Timber;
 /**
  * App Name: Intrepidereyet
  * Author: Dean Shi
- * Use: Starts a service that uses Geofencing to determine if the user is 50m from
+ * Use: Starts a service that uses Geofencing to determine if the user is 50m from Intrepid Labs
+ * Requires: MainActivity.java, GeofenceTransitionsIntentService.java, SendSlackReciever.java
  */
 
 
@@ -83,7 +84,8 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
     void startService() {
         Timber.d("Button has been clicked");
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -128,10 +130,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Timber.d("Google API connection failed");
-
-    }
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) { Timber.d("Google API connection failed"); }
 
     @Override
     public void onResult(@NonNull Status status) {
