@@ -42,18 +42,22 @@ public class SendSlackReciever extends BroadcastReceiver {
                     .build();
 
             SlackService slackService = retrofit.create(SlackService.class);
+            SlackUser slackMessage = new SlackUser("Retrofit Example, also I am here");
 
-            slackService.sendSlackMessage("{\"text\":\"Retrofit Example Text\"}").enqueue(new Callback<String>() {
+            Call<SlackUser> call = slackService.sendSlackMessage(slackMessage);
+            Callback<SlackUser> callBack = new Callback<SlackUser>() {
                 @Override
-                public void onResponse(Call<String> call, retrofit2.Response<String> response) {
-                    Timber.d("Got response from server: %s", response.body());
+                public void onResponse(Call<SlackUser> call,
+                                       retrofit2.Response<SlackUser> response) {
+
                 }
 
                 @Override
-                public void onFailure(Call<String> call, Throwable t) {
-                    Timber.d("Failed to connect to server");
+                public void onFailure(Call<SlackUser> call, Throwable t) {
+
                 }
-            });
+            };
+            call.enqueue(callBack);
 
             return null;
         }
@@ -62,16 +66,15 @@ public class SendSlackReciever extends BroadcastReceiver {
     public interface SlackService {
         @Headers({"Content-type: application/json"})
         @POST("services/T026B13VA/B1FD8L8DN/tM77kIegYKZ78z4oF4reBjVQ")
-        Call<String> sendSlackMessage(@Body String message);
+        Call<SlackUser> sendSlackMessage(@Body SlackUser slackUser);
 
     }
 
     public class SlackUser {
-        @SerializedName("text")
-        String textVal;
+        String text;
 
-        public SlackUser(String text) {
-            this.textVal = text;
+        public SlackUser(String textVal) {
+            this.text = textVal;
         }
 
     }
