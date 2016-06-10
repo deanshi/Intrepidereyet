@@ -120,14 +120,10 @@ public class MapsActivity extends AppCompatActivity implements GoogleApiClient.C
 
     // Methods that are required, but not used.
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Timber.d("Google API connection success");
-    }
+    public void onConnected(@Nullable Bundle bundle) { Timber.d("Google API connection success"); }
 
     @Override
-    public void onConnectionSuspended(int i) {
-        Timber.d("Google API connection failed");
-    }
+    public void onConnectionSuspended(int i) { Timber.d("Google API connection failed"); }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) { Timber.d("Google API connection failed"); }
